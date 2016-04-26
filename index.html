@@ -1,0 +1,216 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+	<title>Data Viz Project</title>
+
+	<meta itemprop="name" content="DC.js + Leaflet"/>
+	<meta itemprop="description" content="DC.js + Leaflet chart"/>
+
+	<meta charset="UTF-8">
+
+	<link type="text/css" href="lib/leaflet.css" rel="stylesheet"/>
+	<link type="text/css" href="lib/leaflet.markercluster.css" rel="stylesheet"/>
+	<link type="text/css" href="lib/dc.css" rel="stylesheet"/>
+	
+	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+  <style>
+	body {
+	font-family: Lucida Sans, sans;
+	font-size: 20px
+	}
+    #holder {
+      width:1050px;
+      margin:20px auto;
+    }
+	#holder1 {
+	  width:800px;
+	  margin-bottom:10px auto;
+	}
+    #holder>div {
+      padding:30px 0;
+      clear:both;
+    }
+    .map {
+      width:800px;
+      height:500px;
+	  margin-bottom: 50px;
+    }
+    .row {
+	  margin:30px;
+	  width: 900px;
+	  height: 600px;
+	  margin-bottom: 100px;
+	  left: 100px;
+    }
+	.axis path,
+	.axis line {
+	  fill: none;
+	  stroke: #000;
+	  shape-rendering: crispEdges;
+	}
+
+	.bar {
+	  fill: steelblue;
+	}
+
+	.x.axis path {
+	  display: none;
+	}
+	
+	#special{
+      font-size: 15px;
+	}
+	
+	section {
+	  padding-top:40px;
+	  margin-top:-40px;
+	}
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="#">Data Visualization</a>
+    </div>
+    <ul class="nav navbar-nav">
+      <li class="active"><a href="index.html">Home</a></li>
+      <li><a href="mentions.html">Competitor Mentions</a></li>
+      <li><a href="popularity.html">Competitor Popularity</a></li>
+      <li><a href="about_data.html">About This Data Set</a></li>
+    </ul>
+  </div>
+</nav>
+  
+
+<div id="holder">
+  <div id="demo1">
+    <h2>Hollywood Feed Twitter Analysis</h2>
+    <i>Twitter Location Data Analysis for Dog Food Retailer</i>
+	<br></br>
+	<a href="/about_data.html#help">Click here if you're confused about this data set</a>
+	<br></br>
+    <div class="map"></div>
+    <div class="row">
+		<h4>Keywords</h4>
+		</div>	
+  </div>
+
+ 
+
+<script type="text/javascript" src="lib/d3.js"></script>
+<script type="text/javascript" src="lib/crossfilter.js"></script>
+<script type="text/javascript" src="lib/dc.js"></script>
+<script type="text/javascript" src="lib/leaflet.js"></script>
+<script src="//d3js.org/d3.v3.min.js"></script>
+
+<!--Optional-->
+<script type="text/javascript" src="lib/leaflet.markercluster.js"></script>
+
+<script type="text/javascript" src="dc.leaflet.js"></script>
+<script type="text/javascript">
+
+/*     Markers      */
+
+d3.tsv("top19_locationdata.tsv", function(data) {
+  drawMarkerSelect(data);
+  drawMarkerArea(data);
+});
+
+function drawMarkerSelect(data) {
+  var xf = crossfilter(data);
+  var groupname = "marker-select";
+	var facilities = xf.dimension(function(d) { return d.geo; });
+	var facilitiesGroup = facilities.group().reduceCount();
+
+  dc.leafletMarkerChart("#demo1 .map",groupname)
+      .dimension(facilities)
+      .group(facilitiesGroup)
+      .width(800)
+	    .height(600)
+      .center([35.1490215, -90.0516284])
+      .zoom(6)
+      .renderPopup(true)
+      .popup(function(d, marker){
+        return d.key + " : " + d.value;
+      })
+      .cluster(true);  
+
+	var types = xf.dimension(function(d) { return d.type; });
+	var typesGroup = types.group().reduceCount();
+
+  dc.rowChart("#demo1 .row",groupname)
+      .dimension(types)
+	  .rowsCap(19)
+      .group(typesGroup)
+      .width(900)
+	    .height(600)
+	    .renderLabel(true)
+	    .renderTitle(true)
+      .ordering(function (p) {
+        return -p.value;
+      });	
+		
+	dc.renderAll(groupname);
+}
+
+
+
+	</script>
+
+	
+<br></br>
+<br></br>
+<div id="holder1">
+	<h3>Why should I care about this data set?</h3>
+	<br></br>
+	<p>With less than two weeks of twitter queries, this data set shows us important infomation concerning Hollywood Feed's locations of interest, keywords of interest, and online presence.
+	</p>
+	<br></br>
+	<p>Below are some interesting conclusions we have made so far about our locations of interest.</p>
+	<br></br>
+	<p><b>Tennessee</b></p>
+	<p id="special">The vast majority of tweets from Tennessee were from the Memphis area and contained the phrase Hollywood Feed. 
+	Nashville and Knoxville did not have any notable data (less than ten tweets in each metropolitan area).</p>
+	<p><b>Alabama</b></p>
+	<p id="special">Birmingham and Huntsville returned close to 75 tweets. In Birmingham area, the top three keywords used were Hollywood Feed, @petsuppliesplus, and @chewy - each only separated by one or two tweets.
+	Since there are two Pet Supplies Plus stores in this area, engaging with our Birmingham customers should definitely be a priority.</p>
+	<p><b>Mississippi</b></p>
+	<p id="special">Oxford and Ridgeland(a suburb of Jackson) were the only two cities with relatively noteable data (around 25 collective tweets). Almost all of these tweets contained the phrase Hollywood Feed.
+	Since there are five Hollywood Feed locations in Mississippi, we were slightly surprised to see such little data, but then again, we are talking about Mississippi.</p>
+	<p><b>Arkansas</b></p>
+	<p id="special">The entire state of Arkansas only returned 11 data points. This suggests that either we did not include enough keywords in our queries or that people from Arkansas don't know how to use the internet.</p>
+	<p><b>Texas</b></p>
+	<p id="special">Around 20 of the 100 tweets located in Dallas contained the phrase Hollywood Feed. 15 of those 20 tweets came from the suburb of McKinney.
+	Since there are 18 stores in the greater Dallas area, we expected to see more tweets about Hollywood Feed.
+	Austin and Houston both returned data that was surprisingly uniformly distributed across the keywords we selected. There were no keywords that stood out in either Austin or Houston.</p>
+	<p><b>Georgia</b></p>
+	<p id="special">The city of Atlanta returned over 40 tweets, while the rest of the state returned around ten additional tweets.
+	25% of the Atlanta tweets contained the phrase rescue dog. This could be an indicator of a potentially good store location because Hollywood Feed customers generally love rescues.</p>
+	<br></br>
+	<p>More than anything, this data set shows us that Hollywood Feed effectively has no twitter presence compared to three of our biggest competitors.
+	The term "Hollywood Feed" is only lagging the third ranked phrase "Petsmart" by less than 100 tweets. For a brick and mortar retailer with just over 40 stores, that is actually pretty impressive.
+	However, the term "@hwfeed" did not rank in the top 19, and when we searched for "from:hwfeed" in our queries, we got zero results - this means that people do not tag Hollywood Feed in tweets very much and more importantly, that <b>Hollywood Feed did not tweet at all</b> during the two weeks we ran queries. 
+	In our opinion, there is probably a causal relationship here. If you never tweet, why would someone tag you in their tweet, right?</p>
+	<br></br>
+	<p>During the period from which we pulled data, the phrase "Hollywood Feed" was mentioned over 230 times, while "@hwfeed" was only tagged 70 times. This is definitely not good news. 
+	Every time a twitter user mentions Hollywood Feed without tagging "@hwfeed", this is a missed opportunity to connect with a potential customer.
+	This may have not been a concern when new stores were relatively close to older, more established stores. However, now that stores are opening in new cities, engaging with new customers through twitter should absolutely be a priority.
+	</p>
+	<br></br>
+	<p>Although Hollywood Feed doesn't have much of a presence on twitter, we did find that Hollywood Feed has a great opportunity to create genuine, shareable content online without using black hat SEO phrases.
+	The phrases dog park, rescue dog, dog food, and dog treats were included in over 20% of the tweets with location data. People actually tweet about these things, and we know where we can find them! 
+	The only problem is that Hollywood Feed isn't a part of the conversation on twitter yet.</p>
+</div>
+	
+	
+	
+	
+	
+</body>
+</html>
