@@ -1,0 +1,205 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+	<title>Data Viz Project</title>
+
+	<meta itemprop="name" content="DC.js + Leaflet"/>
+	<meta itemprop="description" content="DC.js + Leaflet chart"/>
+
+	<meta charset="UTF-8">
+
+	<link type="text/css" href="lib/leaflet.css" rel="stylesheet"/>
+	<link type="text/css" href="lib/leaflet.markercluster.css" rel="stylesheet"/>
+	<link type="text/css" href="lib/dc.css" rel="stylesheet"/>
+	
+	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+  <style>
+	body {
+	font-family: Lucida Sans, sans;
+	}
+    #holder {
+      width:1050px;
+      margin:20px auto;
+    }
+    #holder>div {
+      padding:30px 0;
+      clear:both;
+    }
+    .map {
+      width:800px;
+      height:500px;
+    }
+    .row {
+	  margin-left:30px;
+	  width: 900px;
+	  height: 600px;
+    }
+	.axis path,
+	.axis line {
+	  fill: none;
+	  stroke: #000;
+	  shape-rendering: crispEdges;
+	}
+
+	.bar {
+	  fill: steelblue;
+	}
+
+	.x.axis path {
+	  display: none;
+	}
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="#">Data Visualization</a>
+    </div>
+    <ul class="nav navbar-nav">
+      <li class="active"><a href="#">Home</a></li>
+      <li><a href="#">Competitor Mentions</a></li>
+      <li><a href="#">Competitor Popularity</a></li>
+      <li><a href="#">About This Data Set</a></li>
+    </ul>
+  </div>
+</nav>
+  
+
+<div id="holder">
+  <div id="demo1">
+    <h2>Hollywood Feed Twitter Analysis</h2>
+    <i>Twitter Location Data Analysis for Dog Food Retailer</i>
+	<br></br>
+    <div class="map"></div>
+	<br></br>
+	<br></br>
+    <div class="row">
+		<h4>Keywords</h4>
+		</div>	
+  </div>
+
+ 
+
+<script type="text/javascript" src="lib/d3.js"></script>
+<script type="text/javascript" src="lib/crossfilter.js"></script>
+<script type="text/javascript" src="lib/dc.js"></script>
+<script type="text/javascript" src="lib/leaflet.js"></script>
+<script src="//d3js.org/d3.v3.min.js"></script>
+
+<!--Optional-->
+<script type="text/javascript" src="lib/leaflet.markercluster.js"></script>
+
+<script type="text/javascript" src="dc.leaflet.js"></script>
+<script type="text/javascript">
+
+/*     Markers      */
+
+d3.tsv("top19_locationdata.tsv", function(data) {
+  drawMarkerSelect(data);
+  drawMarkerArea(data);
+});
+
+function drawMarkerSelect(data) {
+  var xf = crossfilter(data);
+  var groupname = "marker-select";
+	var facilities = xf.dimension(function(d) { return d.geo; });
+	var facilitiesGroup = facilities.group().reduceCount();
+
+  dc.leafletMarkerChart("#demo1 .map",groupname)
+      .dimension(facilities)
+      .group(facilitiesGroup)
+      .width(800)
+	    .height(600)
+      .center([35.1490215, -90.0516284])
+      .zoom(6)
+      .renderPopup(true)
+      .popup(function(d, marker){
+        return d.key + " : " + d.value;
+      })
+      .cluster(true);  
+
+	var types = xf.dimension(function(d) { return d.type; });
+	var typesGroup = types.group().reduceCount();
+
+  dc.rowChart("#demo1 .row",groupname)
+      .dimension(types)
+	  .rowsCap(19)
+      .group(typesGroup)
+      .width(900)
+	    .height(600)
+	    .renderLabel(true)
+	    .renderTitle(true)
+      .ordering(function (p) {
+        return -p.value;
+      });
+	  
+
+
+	/*
+<!-- 	var depthChart = dc.barChart("#dc-depth-chart");
+	var dayOfWeekChart = dc.rowChart("#dc-dayweek-chart");
+	
+	var dayOfWeek = facts.dimension(function (d) {
+		var day = d.dtg.getDay();
+		switch (day) {
+		  case 0:
+			return "0.Sun";
+		  case 1:
+			return "1.Mon";
+		  case 2:
+			return "2.Tue";
+		  case 3:
+			return "3.Wed";
+		  case 4:
+			return "4.Thu";
+		  case 5:
+			return "5.Fri";
+		  case 6:
+			return "6.Sat";
+		}
+	});
+	
+	var dayOfWeekGroup = dayOfWeek.group();
+	
+	 // row chart day of week
+	dayOfWeekChart.width(300)
+		.height(220)
+		.margins({top: 5, left: 10, right: 10, bottom: 20})
+		.dimension(dayOfWeek)
+		.group(dayOfWeekGroup)
+		.colors(d3.scale.category10())
+		.label(function (d){
+		   return d.key.split(".")[1];
+		})
+		.title(function(d){return d.value;})
+		.elasticX(true)
+		.xAxis().ticks(4);
+		
+	 dayOfWeekChart.width(300)
+		.height(220)
+		.margins({top: 5, left: 10, right: 10, bottom: 20})
+		.dimension(dayOfWeek)
+		.group(dayOfWeekGroup)
+		.colors(d3.scale.category10())
+		.label(function (d){
+			return d.key.split(".")[0];
+		})
+		.title(function(d){return d.value;})
+		.elasticX(true)
+		.xAxis().ticks(4); -->
+	*/	
+		
+	dc.renderAll(groupname);
+}
+
+
+
+	</script>
+</body>
+</html>

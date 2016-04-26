@@ -1,0 +1,234 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+	<title>Data Viz Project</title>
+
+	<meta itemprop="name" content="DC.js + Leaflet"/>
+	<meta itemprop="description" content="DC.js + Leaflet chart"/>
+
+	<meta charset="UTF-8">
+
+	<link type="text/css" href="lib/leaflet.css" rel="stylesheet"/>
+	<link type="text/css" href="lib/leaflet.markercluster.css" rel="stylesheet"/>
+	<link type="text/css" href="lib/dc.css" rel="stylesheet"/>
+	
+	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+  <style>
+	body {
+	font-family: Lucida Sans, sans;
+	font-size: 20px;
+	}
+    #holder {
+      width:1050px;
+      margin:20px auto;
+    }
+    #holder>div {
+      padding:30px 0;
+      clear:both;
+    }
+	#explanation {
+		width:800px;
+		margin-bottom:10px auto;
+	}
+	
+    .map {
+      width:800px;
+      height:500px;
+    }
+    .row {
+	  margin-left:30px;
+	  width: 900px;
+	  height: 600px;
+    }
+	.axis path,
+	.axis line {
+	  fill: none;
+	  stroke: #000;
+	  shape-rendering: crispEdges;
+	}
+
+	.bar {
+	  fill: steelblue;
+	}
+
+	.x.axis path {
+	  display: none;
+	}
+	
+	#special{
+		font-size:15px;
+	}
+	
+	section {
+	  padding-top:40px;
+	  margin-top:-40px;
+	}
+
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="#">Data Visualization</a>
+    </div>
+    <ul class="nav navbar-nav">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="mentions.html">Competitor Mentions</a></li>
+      <li><a href="popularity.html">Competitor Popularity</a></li>
+      <li class="active"><a href="about_data.html">About This Data Set</a></li>
+	</ul>
+  </div>
+</nav>
+  
+
+<div id="holder">
+  <div id="demo1">
+    <h2>Hollywood Feed Twitter Analysis</h2>
+    <i>Twitter Location Data Analysis for Dog Food Retailer</i>
+	<br></br>
+	<br></br>
+    <div class="explanation">
+	<h3>The Gory Details</h3>
+	<br></br>
+	<p>Searching for data through twitter proved to be very difficult and tedious. Each day we ran up to 35 queries through the twitter search API. 
+	For those of you who aren't familiar with twitter queries, here is an example of one from our data set.</p>
+	<br></br>
+	<div class="well">
+	<p>q=%40chewy&count=100</p>
+	</div>
+	<br></br>
+	<p>The first term after the "q=" is the search term. In this case, we are searching for any tweets containing the phrase "@chewy" - %40 is the ASCII Hex symbol for the @ sign.
+	Since the default number of tweets per query is 15, we set this count to 100 to minimize the amount of data we missed.
+	In other queries, we added an additional characteristic of <b>result type</b>, which allows you to search for the most popular tweets that match that query, the most recent tweets that match that query, or a mixture of both.
+	Since some of our search terms were very popular, we didn't want to get stuck with just tweets posted within the past hour, and we also didn't only want the most popular tweets.
+	So for our more popular terms, we added a component of "&result_type=mixed" to our queries.</p>
+	<br></br>
+	<p>We used the curl command generated for each query to get our data in the form of a .txt file. Since the .txt file was in a json format, we surrounded the data set with brackets and separated each day's query with a comma (we formed separate .txt files for each keyword).
+	We created arrays for each of the elements in the .txt file, then transposed that array so that each index returned the elements we extracted from the tweet.
+	Next, these arrays were written to a .csv file, then concatenated together to form a file over 22,000 lines long.</p>
+	<br></br>
+	<p>Unfortunately, only 1-5% of tweets contain latitude and longitude coordinates. Since the main objective of this project is to plot these very coordinates on a map, finding a solution to this issue was a very high priority.
+	We took all of the unique locations of users profiles from the tweets we collected, eliminated the invalid ones, like "~positive vibes~", and used the <b>geopy python package</b> to find the lat and long values at each of these locations.
+	Because there were almost 1400 unique valid locations, we split the array into 14 smaller arrays to more effectively find overlooked invalid data and not kill my computer (all 14 sets of code took about 30 minutes collectively to run).
+	Our code wrote the location and its lat and long coordinates to a new .csv file. We used a VLOOKUP function in excel to find occurances of each valid location in the full data set.
+	Using this code, we were able to assign lat and long coordinates to over 5,000 of our tweets!</p>
+	<br></br>
+	<p>The main visualization for this project is rendered using the <a href="https://github.com/yurukov/dc.leaflet.js/tree/master" target="_newtab">dc leaflet library</a> and more specifically, <a href="http://opendata.yurukov.net/demo/dcjs_leaflet/" target="_newtab">the first example on this page</a>.
+	It was actually surprisingly easy to edit the index.html file to function using my data set once I changed the variable names. However, the pie chart in the original visualization definitely had to go, so I decided to use a horizontal bar chart instead.
+	Since we had so many keywords, we trimmed the data to only include the top 19 search terms so that the names of the keywords would be legible on the bar chart.
+	</p>
+	<br></br>
+	<br></br>
+	<h3>Why These Visualizations?</h3>
+	<br></br>
+	<p>Hollywood Feed is a growing brick and mortar pet food retailer that relies on extensive employee education and expert product selection to provide unmatched customer service and has more than 40 stores in the southeast.
+	Internet and social media presence haven't been much of a priority until now. Hollywood Feed is now opening stores hundreds of miles away from established, well-known stores and could definitely use twitter data to their advantage.
+	</p>
+	<br></br>
+	<p>We want to use data visualizations to answer these questions:</p>
+	<br></br>
+	<div class="well">
+	<p>Who are Hollywood Feed's customers?</p>
+	<p>What do they tweet about?</p>
+	<p>Where are other people like them?</p>
+	<p>Where are our competitors' customers?</p>
+	<p>Where are our competitors more popular than we are?</p>
+	</div>
+	<br></br>
+	<p>This is probably the broadest set of questions we could have come up with, but since we didn't have much data to go off of, this seemed like a great way to get preliminary information about customers and competitors.
+	Since Hollywood Feed is a regional retailer, location is really important. We are much more concerned about the Petco across the street than the locations on the west coast.
+	A map seemed like the most logical solution. In order to determine which keywords are more important than others, this map had to be interactive with some sort of keyword selection.
+	</p>
+	<br></br>
+	<p>I also think it would be interesting to compare our competitors to one another in terms of their customer engagement (the number of times users mention them in tweets) as well as their popularity (how popular their tweets are).
+	We summed the number of lines in our "@" searches for each competitor on each day to get the total number of mentions and summed the total number of retweets and favorites per competitor per day to get the popularity.
+	We used grouped bar charts to represent both of these data sets.
+	The only real issue we faced in accurately displaying customer engagement is that on April 12, Peta started a trail of negative retweets about Petco and Petsmart in response to National Pet Day.
+	This heavily skewed the data on that day, and the sentiment analysis could not detect enough negativity to counteract this issue.
+	The graph still accurately represents the number of mentions, but it does not account for sentiment.
+	</p>
+	<br></br>
+	<a name="help">
+	<h3>What am I even looking at?</h3>
+	</a>
+	<br></br>
+	<p>This data set can be a little confusing for those of you who aren't familiar with Hollywood Feed competitors and products.</p>
+	<br></br>
+	<p>Here's a description of each of the keyword terms you can find on the map visualization on the home page:</p>
+	<br></br>
+	<div class="well">
+	<p id="special">At Chewy: tweets mentioning Chewy's twitter handle, @chewy</p>
+	<p id="special">Dog Park: tweets containing the words "dog" and "park"</p>
+	<p id="special">Petsmart: tweets containing the word "Petsmart"</p>
+	<p id="special">Pet Food: tweets containing the words "pet" and "food"</p>
+	<p id="special">At Petsmart: tweets mentioning Petsmart's twitter handle, @petsmart</p>
+	<p id="special">Petco: tweets containing the word "Petco"</p>
+	<p id="special">Dog Treats: tweets containing the words "dog" and "treats"</p>
+	<p id="special">Rescue Dog: tweets containing the words "rescue" and "dog"</p>
+	<p id="special">At Petco: tweets mentioning Petco's twitter handle, @petco</p>
+	<p id="special">At Pet Supplies Plus: tweets mentioning Pet Supplies Plus's twitter handle, @petsuppliesplus</p>
+	<p id="special">Hollywood Feed: tweets containing the phrase "Hollywood Feed"</p>
+	<p id="special">Blue Buffalo: tweets containing the phrase "Blue Buffalo"</p>
+	<p id="special">Dog Food: tweets containing the words "dog" and "food"</p>
+	<p id="special">Healthy Pet Food: tweets containing the words "healthy", "pet", and "food"</p>
+	<p id="special">Puppy Image: tweets containing the word "puppy" and an image</p>
+	<p id="special">Dog Image: tweets containing the word "dog" and an image</p>
+	<p id="special">Natural Dog Food: tweets containing the word "natural", "dog", and "food"</p>
+	<p id="special">Natural Balance: tweets containing the phrase "natural balance"</p>
+	<p id="special">From Pet Supplies Plus: tweets from Pet Supplies Plus's account, @petsuppliesplus</p>
+	</div>
+	<br></br>
+	<p>Petco, Petsmart, Chewy, and Pet Supplies Plus are all retailers we are interested in tracking.
+	Blue Buffalo and Natural Balance are both brands of dog food carried in Hollywood Feed stores. </p>
+	<br></br>
+	<p><b>How do I use this thing?</b></p>
+	<br></br>
+	<p>If you would like to select one or more keywords at a time, simply click on each keyword you would like to see, and the map will change accordingly.</p>
+	<br></br>
+	<p>If you would like to select one or more marker (the blue teardrops on the map) at a time, simply click on each point you would like to see, and the map will change accordingly.
+	<b>Note: the map will reset if you have selected a marker and drag it out of the window. Also, the number of markers is <u>not</u> the number of tweets but the number of locations where tweets can be found.
+	You can view the total number of tweets at a location by hovering over the marker.</b></p>
+	<br></br>
+	</section>
+	<h3>What We Would Have Done Differently</h3>
+	<br></br>
+	<p>Most importantly, we would have started running queries as soon as possible after the semester started. Having two weeks of data is probably adequate for this project, but an entire semester's worth would have been much better.
+	</p>
+	<br></br>
+	<p>If we had had more data, we could have seen which keywords were not returning the data we had originally intended it to return. Pet food brand searches such as Fromm and Acana mainly produced tweets in other languages.
+	Setting an additional query parameter to "&lang=en" might have mitigated this issue. We also could have performed queries which pulled tweets from the brand's twitter account, like Acana's account, @ACANApetfood.</p>
+	<br></br>
+	<p>For the map visualization, we would have liked to encode the total number of tweets in each bin (the circle that shows up when you zoom out).
+	It can be confusing to viewers when there are multiple tweets at one location. It would have also been helpful to somehow encode the text of the tweet into the attributes of the marker.
+	I think it would be really awesome to take a sample of up to random ten tweets from that location and display the sentiment of each tweet. For the horizontal bar graph below the map,
+	I would have prefered that the x axis changed according to the highest selected value so that when you have selected a data point containing 43 tweets, you wouldn't have to hover over each keyword to
+	see how many times it was found in that data set.
+	</p>
+	<br></br>
+	<p>For the competitor mentions and popularity graphs, we simply ran out of time. Our main objective was to do the map visualization well, and we did not have much time left over to work on the remaining two visualizations.
+	Clearly, both graphs should instead be line graphs since they are plotting trends over time. We also tried to insert a tooltip into both graphs but could not get it to work.
+	If we had more time, we would also have a filter at the top of each graph to select each of the different competitors.
+	</p>
+	<br></br>
+	<p>In retrospect, I think we spent about 90% of our time on this project just formatting the data correctly for d3. Had we known that the data formatting would
+	take such a long time, we would have started coding much earlier and would have had time to properly develop our other visualizations. This project has definitely sparked
+	a personal interest in data visualizations, and I look forward to developing more in the future.
+	</p>
+	</div>
+	<br></br>
+	<br></br>
+  </div>
+
+ 
+
+<script type="text/javascript" src="lib/d3.js"></script>
+<script type="text/javascript" src="lib/crossfilter.js"></script>
+<script type="text/javascript" src="lib/dc.js"></script>
+<script type="text/javascript" src="lib/leaflet.js"></script>
+<script src="//d3js.org/d3.v3.min.js"></script>
